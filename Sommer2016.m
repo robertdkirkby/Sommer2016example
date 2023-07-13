@@ -1,6 +1,10 @@
-% Replication of Sommer (2016) - Fertility Choice in a life cycle model with idiosyncratic uninsurable earnings risk\
-% WARNING: THE GRIDS ARE TOO SMALL (SPECIFICALLY THE ONE ON ASSETS) AND THIS HAS NOT YET BEEN DEBUGGED (I EXPECT THE 
-% GRID LIMITS ARE INCORRECT, PENSION HAS NOT BEEN SET TO APPROPRIATE VALUE). IS CURRENTLY JUST PROOF OF CONCEPT.
+% Replication of Sommer (2016) - Fertility Choice in a life cycle model with idiosyncratic uninsurable earnings risk
+% WARNING: This will not actually give the results of Sommer (2016) as the
+% parameter h_j (deterministic component of earnings that depends on age)
+% has been lost to the sands of time.
+% WARNING: The grids are small, especially the one on assets. You will need
+% to increase the grid size if you want accurate results. This code is
+% intended more as illustration.
 
 % NOTE: Around line 110 I fit an exponential function, you will need the Matlab 'Curve Fitting Toolbox' to run this.
 
@@ -14,10 +18,6 @@
 % Note: Sommer (2016) reports 'psi' as the 'preference scale' relating to
 % children, but in the utility function (bottom page 33) it is denote zeta.
 % I follow the utility function and call it zeta here.
-
-% Comment: Sommer (2016) says the parameters are estimated by simulated
-% method of moments. This is incorrect, they are just calibrated to target
-% moments.
 
 % Comment: because infertile is an absorbing state in principle what you
 % should do is first solve the infertile problem, and then solve the fertile
@@ -41,7 +41,7 @@ n_semiz=6; % number of children (n in original notation) [Note: max number of ch
 N_j=63; % From age 18 to 80
 Params.agejshifter=17; % Only used when creating graphs
 
-Params.earningsshifter=1;
+Params.earningsshifter=1; % Just used to see how changing h_t up/down changes the results (I introduced this just because the actual values of h_t are not available)
 
 %% Parameters
 % Discount factor
@@ -114,9 +114,7 @@ Params.h_j=[Params.h_j,zeros(1,N_j-Params.Jr+1)];
 % Update pension guess (remains a guess)
 Params.pension=Params.pensionreplacementrate*0.5*exp(Params.h_j(1)); % the 0.5 was to allow for some leisure
 
-%% DEBUG
-Params.pension=0;
-%%
+
 
 % The persistent and transitory components are just following Sommer
 % (2016), except I use Farmer-Today method to discretize (I expect she used
