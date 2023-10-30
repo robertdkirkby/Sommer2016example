@@ -34,9 +34,9 @@
 
 n_d=[11,11,2]; % leisure, spending-on-child, child (l,x,K in original notation)
 n_a=101; % assets (a in original notation)
+n_semiz=6; % number of children (n in original notation) [Note: max number of children will be n_semiz-1 as first point is zero]
 n_z=[7,2]; % persistent component of wage, fertile (epsilon, f in original notation)
 n_e=3; % transitory component of wage (upsilon in original notation)
-n_semiz=6; % number of children (n in original notation) [Note: max number of children will be n_semiz-1 as first point is zero]
 
 N_j=63; % From age 18 to 80
 Params.agejshifter=17; % Only used when creating graphs
@@ -244,8 +244,8 @@ vfoptions.SemiExoStateFn=@(n,nprime,K,probstayhome) Sommer2016_SemiExoStateFn(n,
 DiscountFactorParamNames={'beta'};
 
 % order must be: (d,aprime,a,z,semiz,e,...)
-ReturnFn=@(l,x,K,aprime,a,epsilon,f,n,upsilon,agej,Jr,h_j,r,mew,psi1,psi2,theta,gamma,zeta,kappa,qbar,maxnumchildren,pension,earningsshifter) ...
-    Sommer2016_ReturnFn(l,x,K,aprime,a,epsilon,f,n,upsilon,agej,Jr,h_j,r,mew,psi1,psi2,theta,gamma,zeta,kappa,qbar,maxnumchildren,pension,earningsshifter);
+ReturnFn=@(l,x,K,aprime,a,n,epsilon,f,upsilon,agej,Jr,h_j,r,mew,psi1,psi2,theta,gamma,zeta,kappa,qbar,maxnumchildren,pension,earningsshifter) ...
+    Sommer2016_ReturnFn(l,x,K,aprime,a,n,epsilon,f,upsilon,agej,Jr,h_j,r,mew,psi1,psi2,theta,gamma,zeta,kappa,qbar,maxnumchildren,pension,earningsshifter);
 
 %% Solve for the value function and policy fn
 vfoptions.verbose=1;
@@ -261,8 +261,8 @@ timevf=toc
 % start with epsilon=0; (Sommer pg 30, epsilon_1=0)
 % start with upsilon=0; % (Sommer does not appear to specify, but I am
 % Sommer (2016) Appendix says she used 2 points for epsilon, so I assume that just start on the stationary dist for epsilon.
-jequaloneDist=zeros([n_a,n_z,n_semiz,n_e],'gpuArray');
-jequaloneDist(1,ceil(n_z(1)/2),:,1,:)=shiftdim(f_initialdist.*shiftdim(vfoptions.pi_e,-2),-3); % This would be easier to set up as a loop, but I can just do it as a high-dimension product
+jequaloneDist=zeros([n_a,n_semiz,n_z,n_e],'gpuArray');
+jequaloneDist(1,1,ceil(n_z(1)/2),:,:)=shiftdim(f_initialdist.*shiftdim(vfoptions.pi_e,-1),-3); % This would be easier to set up as a loop, but I can just do it as a high-dimension product
 
 %% Population weights
 % There is no death (until final period) and no population growth, so just use equal weights.
@@ -279,27 +279,27 @@ simoptions.SemiExoStateFn=vfoptions.SemiExoStateFn;
 simoptions.d_grid=d_grid;
 
 simoptions.verbose=1;
-simoptions.parallel=5;
+% simoptions.parallel=5;
 StationaryDist=StationaryDist_FHorz_Case1(jequaloneDist,AgeWeightsParamNames,Policy,n_d,n_a,n_z,N_j,pi_z,Params,simoptions);
 
 %% FnsToEvaluate are how we say what we want to graph the life-cycles of
 % Like with return function, we have to include (h,aprime,a,z) as first
 % inputs, then just any relevant parameters.
-FnsToEvaluate.leisure=@(l,x,K,aprime,a,epsilon,f,n,upsilon) l; % l is fraction of time for leisure
-FnsToEvaluate.moneyonkids=@(l,x,K,aprime,a,epsilon,f,n,upsilon) x; % x is money spend on children
-FnsToEvaluate.havechild=@(l,x,K,aprime,a,epsilon,f,n,upsilon,h_j) K; % K is decision to have a child
-FnsToEvaluate.assets=@(l,x,K,aprime,a,epsilon,f,n,upsilon) a; % a is the current asset holdings
-FnsToEvaluate.fractiontimeworked=@(l,x,K,aprime,a,epsilon,f,n,upsilon) 1-l; % l is fraction of time for leisure
-FnsToEvaluate.earnings=@(l,x,K,aprime,a,epsilon,f,n,upsilon,h_j) exp(h_j+epsilon+upsilon)*(1-l); % w*kappa_j*z*(1-l) is the labor earnings
-FnsToEvaluate.nchildren=@(l,x,K,aprime,a,epsilon,f,n,upsilon) n; % n is number of children
-FnsToEvaluate.infertility=@(l,x,K,aprime,a,epsilon,f,n,upsilon) (1-f); % state that determines whether it is possible to have children
-FnsToEvaluate.childquality=@(l,x,K,aprime,a,epsilon,f,n,upsilon,mew,psi1,theta,psi2) (n>0)*((mew*(x/(n^psi1))^theta + (1-mew)*(l/(n^psi2))^theta)^(1/theta)); % q, child quality
+FnsToEvaluate.leisure=@(l,x,K,aprime,a,n,epsilon,f,upsilon) l; % l is fraction of time for leisure
+FnsToEvaluate.moneyonkids=@(l,x,K,aprime,a,n,epsilon,f,upsilon) x; % x is money spend on children
+FnsToEvaluate.havechild=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) K; % K is decision to have a child
+FnsToEvaluate.assets=@(l,x,K,aprime,a,n,epsilon,f,upsilon) a; % a is the current asset holdings
+FnsToEvaluate.fractiontimeworked=@(l,x,K,aprime,a,n,epsilon,f,upsilon) 1-l; % l is fraction of time for leisure
+FnsToEvaluate.earnings=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) exp(h_j+epsilon+upsilon)*(1-l); % w*kappa_j*z*(1-l) is the labor earnings
+FnsToEvaluate.nchildren=@(l,x,K,aprime,a,n,epsilon,f,upsilon) n; % n is number of children
+FnsToEvaluate.infertility=@(l,x,K,aprime,a,n,epsilon,f,upsilon) (1-f); % state that determines whether it is possible to have children
+FnsToEvaluate.childquality=@(l,x,K,aprime,a,n,epsilon,f,upsilon,mew,psi1,theta,psi2) (n>0)*((mew*(x/(n^psi1))^theta + (1-mew)*(l/(n^psi2))^theta)^(1/theta)); % q, child quality
 % notice that we have called these fractiontimeworked, earnings, assets and nchildren
 
-FnsToEvaluate.condlearnings=@(l,x,K,aprime,a,epsilon,f,n,upsilon,h_j) exp(h_j+epsilon+upsilon); % w*kappa_j*z*(1-l) is the labor earnings
-FnsToEvaluate.h_j=@(l,x,K,aprime,a,epsilon,f,n,upsilon,h_j) h_j; % w*kappa_j*z*(1-l) is the labor earnings
-FnsToEvaluate.epsilon=@(l,x,K,aprime,a,epsilon,f,n,upsilon,h_j) epsilon; % w*kappa_j*z*(1-l) is the labor earnings
-FnsToEvaluate.upsilon=@(l,x,K,aprime,a,epsilon,f,n,upsilon,h_j) upsilon; % w*kappa_j*z*(1-l) is the labor earnings
+FnsToEvaluate.condlearnings=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) exp(h_j+epsilon+upsilon); % w*kappa_j*z*(1-l) is the labor earnings
+FnsToEvaluate.h_j=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) h_j; % w*kappa_j*z*(1-l) is the labor earnings
+FnsToEvaluate.epsilon=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) epsilon; % w*kappa_j*z*(1-l) is the labor earnings
+FnsToEvaluate.upsilon=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) upsilon; % w*kappa_j*z*(1-l) is the labor earnings
 
 
 %% Calculate the life-cycle profiles
