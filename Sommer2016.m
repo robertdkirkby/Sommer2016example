@@ -304,7 +304,7 @@ FnsToEvaluate.upsilon=@(l,x,K,aprime,a,n,epsilon,f,upsilon,h_j) upsilon; % w*kap
 
 %% Calculate the life-cycle profiles
 simoptions.parallel=2;
-AgeConditionalStats=LifeCycleProfiles_FHorz_Case1(StationaryDist,Policy,FnsToEvaluate,[],Params,n_d,n_a,n_z,N_j,d_grid,a_grid,z_grid,simoptions);
+AgeConditionalStats=LifeCycleProfiles_FHorz_Case1(StationaryDist,Policy,FnsToEvaluate,Params,[],n_d,n_a,n_z,N_j,d_grid,a_grid,z_grid,simoptions);
 
 % We can do a version of Figure 2 of Sommmer (2016)
 fig2=figure(2);
