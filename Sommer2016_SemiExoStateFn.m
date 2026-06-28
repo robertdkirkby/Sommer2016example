@@ -1,4 +1,6 @@
-function prob=Sommer2016_SemiExoStateFn(n,nprime,K,probstayhome)
+function prob=Sommer2016_SemiExoStateFn(n,nprime,K,probstayhome,maxnumchildren)
+% Transition probability for child count nprime conditional on n and K.
+% Inputs are scalars; output is the scalar transition probability.
 
 % Matlab has a binopdf, but it cannot be used here as it conflicts with arrayfun()
 % prob=binopdf(nprime,n+K,probstayhome);
@@ -10,8 +12,18 @@ function prob=Sommer2016_SemiExoStateFn(n,nprime,K,probstayhome)
 % Following is a manual verion
 % prob= (factorial(n+K)/(factorial(nprime)*factorial(n+K-nprime))) * probstayhome^nprime * (1-probstayhome)^(n+K-nprime);
 % Turns out cannot use factorial() with arrayfun() either so,
-
-if nprime>n+K
+%
+% VFI Toolkit evaluates this transition for every value on the decision
+% grid, including K=1 when n is already at maxnumchildren. The return
+% function rules out that choice, but the transition matrix still needs to
+% be a valid stochastic matrix during setup.
+if n+K>maxnumchildren
+    if nprime==maxnumchildren
+        prob=1;
+    else
+        prob=0;
+    end
+elseif nprime>n+K
     prob=0;
 else
     % factorial(nprime)
@@ -36,4 +48,4 @@ else
 end
 
 
-end
+end %end function

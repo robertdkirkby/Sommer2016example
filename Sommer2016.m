@@ -235,7 +235,7 @@ n_grid=(0:1:(n_semiz-1))'; % first grid point is zero children
 vfoptions.n_semiz=n_semiz;
 vfoptions.semiz_grid=n_grid;
 % Define the transition probabilities of the semi-exogenous states
-vfoptions.SemiExoStateFn=@(n,nprime,K,probstayhome) Sommer2016_SemiExoStateFn(n,nprime,K,probstayhome);
+vfoptions.SemiExoStateFn=@(n,nprime,K,probstayhome,maxnumchildren) Sommer2016_SemiExoStateFn(n,nprime,K,probstayhome,maxnumchildren);
 % It is hardcoded that only the 'last' decision variable can influence the transition probabilities of the semi-exogenous states
 % The semi-exogenous states must be included in the return fn, fns to evaluate, etc., as the last 'z' variables
 
