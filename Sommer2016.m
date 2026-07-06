@@ -243,7 +243,7 @@ vfoptions.SemiExoStateFn=@(n,nprime,K,probstayhome,maxnumchildren) Sommer2016_Se
 %% Return function
 DiscountFactorParamNames={'beta'};
 
-% order must be: (d,aprime,a,z,semiz,e,...)
+% order must be: (d,aprime,a,semiz,z,e,...)
 ReturnFn=@(l,x,K,aprime,a,n,epsilon,f,upsilon,agej,Jr,h_j,r,mew,psi1,psi2,theta,gamma,zeta,kappa,qbar,maxnumchildren,pension,earningsshifter) ...
     Sommer2016_ReturnFn(l,x,K,aprime,a,n,epsilon,f,upsilon,agej,Jr,h_j,r,mew,psi1,psi2,theta,gamma,zeta,kappa,qbar,maxnumchildren,pension,earningsshifter);
 
