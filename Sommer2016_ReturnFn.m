@@ -52,9 +52,7 @@ end
 
 if K==1 && n==maxnumchildren
     F=-Inf; % You are not allowed to try to leave the top of the grid on number of children 
-    % This is just needed because of how the transition probabilities on n
-    % are determined (they would otherwise fail to sum to one).
     % Not clear from paper how Sommer (2016) deals with this as I imagine she must have had a maximum n in the codes?
 end
 
-end
+end %end function
